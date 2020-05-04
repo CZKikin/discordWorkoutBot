@@ -37,6 +37,3 @@ Na dalších commandech se pracuje. :)
     ''')
 client.run("TOKEN_HERE")
 
-
-
-
