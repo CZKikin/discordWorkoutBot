@@ -22,7 +22,7 @@ async def ping(ctx):
 async def vojta(ctx):
     await ctx.send("Vojta je prostě machr :lidl:")
 
-client.run("NzA2OTI5NTkwNDA4NDQ1OTU1.XrBZnQ.m2fAg8qHdJ0DFXjI1e_V7WblyNU")
+client.run("TOKEN_HERE")
 
 
 
