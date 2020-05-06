@@ -58,5 +58,5 @@ Ping - Vypíše ping bota.
 Beh dráha čas - zapíše běh.
 Na dalších commandech se pracuje. :)
     ''')
-client.run("NzA2OTI5NTkwNDA4NDQ1OTU1.XrJ6Vg.RkK7HxF7_QgWQZ-PQU7eFFopVBc")
+client.run("FUCKING_DO_NOT_PUT_HERE_TOKEN")
 
