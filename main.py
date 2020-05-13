@@ -22,7 +22,9 @@ async def ping(ctx):
 async def beh(ctx, distance, time):
     try:
         distance = float(distance)
-        minutes, seconds = time.split(":")    
+        minutes, seconds = time.split(":") 
+        if not await is_time(ctx, minutes, seconds):
+            return
 
     except ValueError:
         await ctx.send("Zadal jsi špatně dráhu - zadej číslo v km")
@@ -33,21 +35,33 @@ async def beh(ctx, distance, time):
         print(f"ERROR WITH ARGUMENTS distance = {distance} time = {time}\n{exx}")
         return
 
+    author = str(ctx.author)
+    author = author.split('#') 
+    await ctx.send(f"Uběhl jsi {distance}km za {minutes} minut a {seconds} sekund, jen tak dál {author[0]}.")
+    await format_data_for_table(ctx, author[0], distance, "run", minutes, seconds)
+    
+async def is_time(ctx, minutes, seconds):
     try:
         minutes = int(minutes)
         seconds = int(seconds)
         if seconds > 59 or seconds < 0 or minutes < 0:
             await ctx.send("Špatně zadaný čas X:XX")
-            return
+            return False
     except ValueError:
         await ctx.send("Zadal jsi špatně čas!")
-        return
+        return False
+    return True
 
-    print(minutes, seconds)
-    author = str(ctx.author)
-    author = author.split('#') 
-    await ctx.send(f"Uběhl jsi {distance}km za {minutes} minut a {seconds} sekund, jen tak dál {author[0]}.")
+async def format_data_for_table(ctx, name, work, work_type, minutes, seconds):
+    wpm = 60 * (float(work) / (float(minutes) * 60 + float(seconds)))
+    if work_type == "run":
+        await ctx.send(f"Zvládl jsi {wpm:.2f}km/min") 
+    else: 
+        await ctx.send(f"Zvládl jsi {wpm:.2f}cviku(ů)/min")
     
+    enter = f"{name};{wpm};{work_type}" 
+
+
 async def save_table():
     pass
 
@@ -58,5 +72,5 @@ Ping - Vypíše ping bota.
 Beh dráha čas - zapíše běh.
 Na dalších commandech se pracuje. :)
     ''')
-client.run("NzA2OTI5NTkwNDA4NDQ1OTU1.XrJ6Vg.RkK7HxF7_QgWQZ-PQU7eFFopVBc")
+client.run("NzA2OTI5NTkwNDA4NDQ1OTU1.Xrvozg.PuMbteDygiKU3KYQrmM9Daba1Ac")
 
