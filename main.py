@@ -10,6 +10,17 @@ except Exception as e:
 
 client = commands.Bot(command_prefix = '.')
 
+class Enter:
+
+    def __init__(self, name, wpm, work_type):
+        self.name = name
+        self.wpm = wpm
+        self.work_type = work_type
+    
+    def __str__(self):
+        return f"{self.name};{self.wpm};{self.work_type}"
+
+
 @client.event
 async def on_ready():
     print("RoBot je připraven.")
@@ -59,10 +70,17 @@ async def format_data_for_table(ctx, name, work, work_type, minutes, seconds):
     else: 
         await ctx.send(f"Zvládl jsi {wpm:.2f}cviku(ů)/min")
     
-    enter = f"{name};{wpm};{work_type}" 
+    enter = Enter(name, wpm, work_type) 
+    print(str(enter))
+    #await compare(enter)
 
+"""
+async def compare(enter):
+    with open(f"{enter.work_type}.csv, r"):
+        pass
+"""
 
-async def save_table():
+async def save_table(enter):
     pass
 
 @client.command()
@@ -72,5 +90,6 @@ Ping - Vypíše ping bota.
 Beh dráha čas - zapíše běh.
 Na dalších commandech se pracuje. :)
     ''')
-client.run("NzA2OTI5NTkwNDA4NDQ1OTU1.Xrvozg.PuMbteDygiKU3KYQrmM9Daba1Ac")
+
+client.run("")
 
