@@ -4,6 +4,7 @@ Author: CZKikin
 try:
     import discord 
     from discord.ext import commands
+    import klic 
 
 except Exception as e:
     print(e)
@@ -12,13 +13,12 @@ client = commands.Bot(command_prefix = '.')
 
 class Enter:
 
-    def __init__(self, name, wpm, work_type):
+    def __init__(self, name, wpm):
         self.name = name
         self.wpm = wpm
-        self.work_type = work_type
     
     def __str__(self):
-        return f"{self.name};{self.wpm};{self.work_type}"
+        return f"{self.name};{self.wpm}"
 
 
 @client.event
@@ -70,18 +70,16 @@ async def format_data_for_table(ctx, name, work, work_type, minutes, seconds):
     else: 
         await ctx.send(f"Zvládl jsi {wpm:.2f}cviku(ů)/min")
     
-    enter = Enter(name, wpm, work_type) 
+    enter = Enter(name, wpm) 
     print(str(enter))
-    #await compare(enter)
+    await add_to_table(enter, work_type)
 
-"""
-async def compare(enter):
-    with open(f"{enter.work_type}.csv, r"):
-        pass
-"""
+async def add_to_table(enter, work_type):
+    with open("{}.records".format(work_type),"a+") as file:
+        file.write("{}\n".format(str(enter)))
+    print("added to file {}.records".format(work_type))
+    #await sort_the_table()
 
-async def save_table(enter):
-    pass
 
 @client.command()
 async def hilfe(ctx):
@@ -91,5 +89,6 @@ Beh dráha čas - zapíše běh.
 Na dalších commandech se pracuje. :)
     ''')
 
-client.run("")
+client.run(klic.TOKEN) #I always forgot to remove token - added file which will be never pushed
+
 
