@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 '''
 Author: CZKikin
 '''
@@ -9,8 +10,12 @@ try:
 except Exception as e:
     print(e)
 
+#Client has to be defined before using decorators
 client = commands.Bot(command_prefix = '.')
 
+valid_worktypes = [ "run" ] 
+
+#I needed something like C struct. Correct me with better solution
 class Enter:
 
     def __init__(self, name, wpm):
@@ -30,7 +35,7 @@ async def ping(ctx):
     await ctx.send(f"Tvá odezva je: {client.latency * 1000}ms, Tvůj workoutbot_beta :)")
 
 @client.command()
-async def beh(ctx, distance, time):
+async def run(ctx, distance, time):
     try:
         distance = float(distance)
         minutes, seconds = time.split(":") 
@@ -50,7 +55,32 @@ async def beh(ctx, distance, time):
     author = author.split('#') 
     await ctx.send(f"Uběhl jsi {distance}km za {minutes} minut a {seconds} sekund, jen tak dál {author[0]}.")
     await format_data_for_table(ctx, author[0], distance, "run", minutes, seconds)
-    
+ 
+@client.command()
+async def hilfe(ctx):
+    await ctx.send('''Tož co chceš...
+ping - Vypíše ping bota.
+run dráha čas - zapíše běh.
+table disciplína - vypíše tabulku disciplíny
+Na dalších commandech se pracuje. :)
+    ''')
+
+@client.command()
+async def table(ctx, work_type):
+    if work_type not in valid_worktypes:
+        return await ctx.send("Nevalidní disciplína, .worktype pro info")
+    report = ""
+    with open("{}.records".format(work_type),"r+") as file:
+        for row in sorted(file.readlines()):
+            name, score = row.split(";")
+            report += "Machr: {} Skóre: {}".format(name,score)
+        await ctx.send(report)
+
+@client.command()
+async def worktype(ctx):
+    await ctx.send("Disciplíny: {}".format(valid_worktypes))
+
+   
 async def is_time(ctx, minutes, seconds):
     try:
         minutes = int(minutes)
@@ -77,17 +107,6 @@ async def format_data_for_table(ctx, name, work, work_type, minutes, seconds):
 async def add_to_table(enter, work_type):
     with open("{}.records".format(work_type),"a+") as file:
         file.write("{}\n".format(str(enter)))
-    print("added to file {}.records".format(work_type))
-    #await sort_the_table()
-
-
-@client.command()
-async def hilfe(ctx):
-    await ctx.send('''Tož co chceš...
-Ping - Vypíše ping bota.
-Beh dráha čas - zapíše běh.
-Na dalších commandech se pracuje. :)
-    ''')
 
 client.run(klic.TOKEN) #I always forgot to remove token - added file which will be never pushed
 
