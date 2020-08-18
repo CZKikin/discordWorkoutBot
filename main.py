@@ -11,7 +11,7 @@ except Exception as e:
     print(e)
 
 #Client has to be defined before using decorators
-client = commands.Bot(command_prefix = '.')
+client = commands.Bot(command_prefix = 'w ')
 
 valid_worktypes = [ "run" ] 
 
