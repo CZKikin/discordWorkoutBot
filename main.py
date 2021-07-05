@@ -110,9 +110,12 @@ async def readTable(ctx, workType):
         return
 
     readData.sort(reverse=True, key=getScore) 
+    readData[0][0] = "🥇" + readData[0][0]
+    readData[1][0] = "🥈" + readData[1][0]
+    readData[2][0] = "🥉" + readData[2][0]
     await ctx.send(f"{workType} begin =============")
-    for index, i in enumerate(readData):
-        await ctx.send(f"{index+1} {i[0]}, disciplína {workType} {i[1]} za {i[2]}:{i[3]}")
+    for i in readData:
+        await ctx.send(f"{i[0]}, disciplína {workType} {i[1]} za {i[2]}:{i[3]}")
     await ctx.send(f"{workType} end ===============")
 
 def getScore(e):
