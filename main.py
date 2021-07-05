@@ -8,80 +8,16 @@ try:
     import klic 
 
 except Exception as e:
-    print(e)
+    print(f"Failed to import!\ne")
 
 #Client has to be defined before using decorators
 client = commands.Bot(command_prefix = 'w ')
 
-valid_worktypes = [ "run" ] 
-
-#I needed something like C struct. Correct me with better solution
-class Enter:
-
-    def __init__(self, name, wpm):
-        self.name = name
-        self.wpm = wpm
-    
-    def __str__(self):
-        return f"{self.name};{self.wpm}"
-
-
 @client.event
 async def on_ready():
-    print("RoBot je připraven.")
+    print("Bot is ready.")
 
-@client.command()
-async def ping(ctx):
-    await ctx.send(f"Tvá odezva je: {client.latency * 1000}ms, Tvůj workoutbot_beta :)")
-
-@client.command()
-async def run(ctx, distance, time):
-    try:
-        distance = float(distance)
-        minutes, seconds = time.split(":") 
-        if not await is_time(ctx, minutes, seconds):
-            return
-
-    except ValueError:
-        await ctx.send("Zadal jsi špatně dráhu - zadej číslo v km")
-        return
-    
-    except Exception as exx:
-        await ctx.send("Nastala chyba bota - kontaktuj admina :)")
-        print(f"ERROR WITH ARGUMENTS distance = {distance} time = {time}\n{exx}")
-        return
-
-    author = str(ctx.author)
-    author = author.split('#') 
-    await ctx.send(f"Uběhl jsi {distance}km za {minutes} minut a {seconds} sekund, jen tak dál {author[0]}.")
-    await format_data_for_table(ctx, author[0], distance, "run", minutes, seconds)
- 
-@client.command()
-async def hilfe(ctx):
-    await ctx.send('''Tož co chceš...
-ping - Vypíše ping bota.
-run dráha čas - zapíše běh.
-table disciplína - vypíše tabulku disciplíny
-Na dalších commandech se pracuje. :)
-    ''')
-
-@client.command()
-async def table(ctx, work_type):
-    if work_type not in valid_worktypes:
-        return await ctx.send("Nevalidní disciplína, .worktype pro info")
-    report = ""
-    with open("{}.records".format(work_type),"r+") as file:
-        for row in sorted(file.readlines()):
-            name, score = row.split(";")
-            report += "Machr: {} Skóre: {}".format(name,score)
-        await ctx.send(report)
-
-@client.command()
-async def worktype(ctx):
-    await ctx.send("Disciplíny: {}".format(valid_worktypes))
-
-   
-async def is_time(ctx, minutes, seconds):
+async def isTime(ctx, minutes, seconds):
     try:
         minutes = int(minutes)
         seconds = int(seconds)
@@ -93,21 +29,67 @@ async def is_time(ctx, minutes, seconds):
         return False
     return True
 
-async def format_data_for_table(ctx, name, work, work_type, minutes, seconds):
-    wpm = 60 * (float(work) / (float(minutes) * 60 + float(seconds)))
-    if work_type == "run":
-        await ctx.send(f"Zvládl jsi {wpm:.2f}km/min") 
-    else: 
-        await ctx.send(f"Zvládl jsi {wpm:.2f}cviku(ů)/min")
-    
-    enter = Enter(name, wpm) 
-    print(str(enter))
-    await add_to_table(enter, work_type)
 
-async def add_to_table(enter, work_type):
-    with open("{}.records".format(work_type),"a+") as file:
-        file.write("{}\n".format(str(enter)))
+@client.command()
+async def ping(ctx):
+    await ctx.send(f"Tvá odezva je: {client.latency * 1000}ms.")
+
+@client.command()
+async def run(ctx, distance, time):
+    try:
+        distance = float(distance)
+        minutes, seconds = time.split(":") 
+        if not await isTime(ctx, minutes, seconds):
+            return
+
+    except ValueError:
+        await ctx.send("Zadal jsi špatně dráhu - zadej číslo v km")
+        return
+    
+    except Exception as exx:
+        await ctx.send(f"Nastala chyba bota - kontaktuj admina a pošli mu tyto informace:\n\
+                distance = {distance} time = {time}\n{exx}")
+        return
+
+    author = str(ctx.author)
+    author = author.split('#') 
+    await ctx.send(f"Uběhl jsi {distance}km za {minutes} minut a {seconds} sekund, jen tak dál {author[0]}.")
+
+    tableData = { "author": author[0],
+            "distance": distance,
+            "workType": "run",
+            "minutes": minutes,
+            "seconds": seconds
+            }
+    await saveToTable(tableData)
+
+async def saveToTable(tableData):
+    with open(tableData["workType"], "a+") as file:
+        file.write(f'{tableData["author"]},{tableData["distance"]},{tableData["minutes"]},{tableData["seconds"]}')
+
+@client.command()
+async def readTable(ctx, workType):
+    readData = []
+    with open(workType, "r") as file:
+        lines = file.readlines()
+        for i in lines:
+            i = i.split(",")
+            readData.append(i)
+
+    readData.sort(reverse=True, key=getScore) 
+    for i in readData:
+        await ctx.send(f"{i[0]}, disciplína {workType} {i[1]} za {i[2]}:{i[3]}")
+
+def getScore(e):
+    print(f"{float(e[1])/(int(e[2]) * 60 + int(e[3]))}")
+    return float(e[1])/(int(e[2]) * 60 + int(e[3]))
+
+@client.command()
+async def hilfe(ctx):
+    await ctx.send('''Tož co chceš...
+ping - Vypíše ping bota.
+run dráha čas - zapíše běh.
+readTable disciplína - vypíše tabulku disciplíny
+''')
 
 client.run(klic.TOKEN) #I always forgot to remove token - added file which will be never pushed
-
-
